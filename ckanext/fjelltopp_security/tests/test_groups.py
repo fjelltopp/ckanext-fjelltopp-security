@@ -40,7 +40,7 @@ class TestSecureGroupActions:
                 image_url=image_url
             )
 
-        assert 'External image URLs are not allowed' in str(exception_info.value)
+        assert 'Image URL must be a local path. External URLs are not allowed' in str(exception_info.value)
 
     def test_group_create_without_image_url(self):
         """Test group creation succeeds without an image URL."""
@@ -95,4 +95,4 @@ class TestSecureGroupActions:
                 data_dict=update_dict
             )
 
-        assert 'External image URLs are not allowed' in str(exception_info.value)
+        assert 'Image URL must be a local path. External URLs are not allowed' in str(exception_info.value)

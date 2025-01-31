@@ -20,7 +20,7 @@ def validate_no_external_images(data_dict):
         image_url = data_dict['image_url'].strip()
         if image_url and image_url.startswith(('http://', 'https://', '//')):
             raise toolkit.ValidationError({
-                'image_url': ['External image URLs are not allowed for security reasons']
+                "Image URL must be a local path. External URLs are not allowed"
             })
 
 

@@ -41,7 +41,7 @@ class TestSecureOrganizationActions:
                 image_url=image_url
             )
 
-        assert 'External image URLs are not allowed' in str(exception_info.value)
+        assert 'Image URL must be a local path. External URLs are not allowed' in str(exception_info.value)
 
     def test_organization_create_without_image_url(self):
         """Test organization creation succeeds without an image URL."""
@@ -96,4 +96,4 @@ class TestSecureOrganizationActions:
                 data_dict=update_dict
             )
 
-        assert 'External image URLs are not allowed' in str(exception_info.value)
+        assert 'Image URL must be a local path. External URLs are not allowed' in str(exception_info.value)
