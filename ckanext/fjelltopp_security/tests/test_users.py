@@ -77,7 +77,7 @@ class TestSecureUserActions:
     # API Tests
     def test_api_user_create_with_external_image(self, app):
         """Test that the API blocks external images during user creation."""
-        sysadmin = factories.Sysadmin()
+        sysadmin = factories.Sysadmin(image_url=None)
 
         user_dict = {
             'name': 'apitestuser',
@@ -91,10 +91,12 @@ class TestSecureUserActions:
             url,
             json=user_dict,
             headers={'Authorization': sysadmin['apikey']},
-            status=500  # Setting expected status code to 500
+            status=409
         )
 
-        # Check error message in response
         response_dict = response.json
-        assert 'message' in response_dict
-        assert 'Image URL must be a local path. External URLs are not allowed' in str(response_dict['message'])
+        assert not response_dict['success']
+        assert 'error' in response_dict
+        assert 'image_url' in response_dict['error']
+        assert 'Image URL must be a local path. External URLs are not allowed' in response_dict['error']['image_url'][0]
+
