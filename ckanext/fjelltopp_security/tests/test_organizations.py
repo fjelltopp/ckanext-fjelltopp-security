@@ -1,0 +1,99 @@
+import pytest
+from ckan.tests import factories
+from ckan.plugins import toolkit
+from ckan.logic import ValidationError
+
+
+@pytest.mark.ckan_config("ckan.plugins", "fjelltopp_security")
+@pytest.mark.usefixtures("clean_db", "with_plugins")
+class TestSecureOrganizationActions:
+
+    @pytest.fixture
+    def base_organization(self):
+        """Create a basic organization with factories."""
+        return factories.Organization(
+            image_url='/images/test-org-image.jpg'
+        )
+
+    def test_organization_create_with_valid_data(self):
+        """Test organization creation with valid local image URL succeeds."""
+        org_dict = {
+            'name': 'testorg',
+            'title': 'Test Organization',
+            'image_url': '/images/test-org-image.jpg'
+        }
+        organization = factories.Organization(**org_dict)
+
+        assert organization['name'] == org_dict['name']
+        assert organization['title'] == org_dict['title']
+        assert organization['image_url'] == org_dict['image_url']
+
+    @pytest.mark.parametrize("image_url", [
+        'http://example.com/org-image.jpg',
+        'https://example.com/org-image.jpg',
+        '//example.com/org-image.jpg'
+    ])
+
+    def test_organization_create_with_external_image_fails(self, image_url):
+        """Test organization creation fails with external image URLs."""
+        with pytest.raises(ValidationError) as exception_info:
+            factories.Organization(
+                image_url=image_url
+            )
+
+        assert 'External image URLs are not allowed' in str(exception_info.value)
+
+    def test_organization_create_without_image_url(self):
+        """Test organization creation succeeds without an image URL."""
+        organization = factories.Organization(image_url=None)
+        assert 'image_url' not in organization or not organization['image_url']
+
+    def test_organization_update_with_valid_data(self, base_organization):
+        """Test organization update with valid local image URL succeeds."""
+        update_dict = {
+            'id': base_organization['id'],
+            'name': base_organization['name'],
+            'title': 'Updated Test Organization',
+            'image_url': '/images/updated-org-image.jpg'
+        }
+        updated_org = toolkit.get_action('organization_update')(
+            context={'ignore_auth': True},
+            data_dict=update_dict
+        )
+        assert updated_org['image_url'] == update_dict['image_url']
+        assert updated_org['title'] == update_dict['title']
+
+    def test_organization_update_without_image_url(self, base_organization):
+        """Test organization update succeeds when not modifying image URL."""
+        original_image_url = base_organization['image_url']
+        update_dict = {
+            'id': base_organization['id'],
+            'name': base_organization['name'],
+            'title': 'Updated Test Organization'
+        }
+        updated_org = toolkit.get_action('organization_update')(
+            context={'ignore_auth': True},
+            data_dict=update_dict
+        )
+        assert updated_org['image_url'] == original_image_url
+
+    @pytest.mark.parametrize("image_url", [
+        'http://example.com/org-image.jpg',
+        'https://example.com/org-image.jpg',
+        '//example.com/org-image.jpg'
+    ])
+    def test_organization_update_with_external_image_fails(self, base_organization, image_url):
+        """Test organization update fails with external image URLs."""
+        update_dict = {
+            'id': base_organization['id'],
+            'name': base_organization['name'],
+            'title': 'Updated Test Organization',
+            'image_url': image_url
+        }
+        with pytest.raises(ValidationError) as exception_info:
+            toolkit.get_action('organization_update')(
+                context={'ignore_auth': True},
+                data_dict=update_dict
+            )
+
+        assert 'External image URLs are not allowed' in str(exception_info.value)

@@ -1,20 +1,40 @@
+import logging
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
+import ckanext.fjelltopp_security.actions as fjelltopp_security_actions
+
+log = logging.getLogger(__name__)
 
 
 class FjelltoppSecurityPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IMiddleware, inherit=True)
-    
+    plugins.implements(plugins.IActions)
+    # plugins.implements(plugins.IValidators)
+
+
+    # plugins.implements(plugins.IConfigurable)
 
     # IConfigurer
-
     def update_config(self, config_):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
-        toolkit.add_resource("assets", "fjelltopp_security")
+        toolkit.add_resource("assets", "fjelltopp-security")
 
+    # IValidators
 
+    # IActions
+    def get_actions(self):
+        return {
+            'user_update': fjelltopp_security_actions.secure_user_update,
+            'user_create': fjelltopp_security_actions.secure_user_create,
+            'group_update': fjelltopp_security_actions.secure_group_update,
+            'group_create': fjelltopp_security_actions.secure_group_create,
+            'organization_update': fjelltopp_security_actions.secure_organization_update,
+            'organization_create': fjelltopp_security_actions.secure_organization_create,
+        }
+
+    # IMiddleware
     def make_middleware(self, app, config):
         @app.after_request
         def apply_owasp(response):
