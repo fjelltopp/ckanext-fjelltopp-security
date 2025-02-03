@@ -102,126 +102,77 @@ class TestSecureOrganizationActions:
 @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
 class TestSecureOrganizationAPI:
 
-    @staticmethod
-    def _assert(response,
-                success = True,
-                expected_image_url = '/images/test-image.jpg'):
-        if success:
-            assert response.status_code == 200
-            result = response.json
-            assert result['success'] is True
-            assert result['result']['image_url'] == expected_image_url
-        else:
-            assert response.status_code == 409
-            error_dict = response.json
-            assert error_dict['success'] is False
-            assert 'Image URL must be a local path' in str(error_dict['error'])
-
-    def test_api_organization_create_with_external_image(self, app):
+    def test_api_organization_create_with_external_image(self, _call_api, _assert):
         """Test that the API blocks external images during organization creation."""
-        sysadmin = factories.Sysadmin(image_url='')
-        env = {'REMOTE_USER': sysadmin['name']}
         org_dict = {
             'name': 'test-org',
             'title': 'Test Organization',
             'image_url': 'https://example.com/image.jpg'
         }
-        url = toolkit.url_for('api.action', ver=3, logic_function='organization_create')
-        response = app.post(
-            url,
-            json=org_dict,
-            extra_environ=env,
-            expect_errors=True
+        _assert(
+            _call_api(org_dict, 'organization_create', True),
+            False
         )
-        TestSecureOrganizationAPI._assert(response, False)
 
-    def test_api_organization_update_with_external_image(self, app):
+    def test_api_organization_update_with_external_image(self, _call_api, _assert):
         """Test that the API blocks external images during organization update."""
-        sysadmin = factories.Sysadmin(image_url='')
-        env = {'REMOTE_USER': sysadmin['name']}
-
         org = factories.Organization(image_url='/images/original.jpg')
-
         update_dict = {
             'id': org['id'],
             'image_url': 'https://example.com/updated-image.jpg'
         }
-        url = toolkit.url_for('api.action', ver=3, logic_function='organization_update')
-        response = app.post(
-            url,
-            json=update_dict,
-            extra_environ=env,
-            expect_errors=True
+        _assert(
+            _call_api(update_dict, 'organization_update', True),
+            False
         )
-        TestSecureOrganizationAPI._assert(response, False)
 
-    def test_api_organization_update_with_valid_image(self, app):
+
+    def test_api_organization_update_with_valid_image(self, _call_api, _assert):
         """Test that the API allows local images during organization update."""
-        sysadmin = factories.Sysadmin(image_url='')
-        env = {'REMOTE_USER': sysadmin['name']}
-
         org = factories.Organization(image_url='/images/original.jpg')
-
         update_dict = {
             'id': org['id'],
             'image_url': '/images/updated-image.jpg'
         }
-        url = toolkit.url_for('api.action', ver=3, logic_function='organization_update')
-        response = app.post(
-            url,
-            json=update_dict,
-            extra_environ=env
+        _assert(
+            _call_api(update_dict, 'organization_update', True),
+            True,
+            '/images/updated-image.jpg'
         )
-        TestSecureOrganizationAPI._assert(response, True, '/images/updated-image.jpg')
 
-    def test_api_organization_create_with_valid_image(self, app):
+    def test_api_organization_create_with_valid_image(self, _call_api, _assert):
         """Test that the API allows local images during organization creation."""
-        sysadmin = factories.Sysadmin(image_url='')
-        env = {'REMOTE_USER': sysadmin['name']}
         org_dict = {
             'name': 'test-org',
             'title': 'Test Organization',
             'image_url': '/images/test-image.jpg'
         }
-        url = toolkit.url_for('api.action', ver=3, logic_function='organization_create')
-        response = app.post(
-            url,
-            json=org_dict,
-            extra_environ=env
+        _assert(
+            _call_api(org_dict, 'organization_create', True),
+            True
         )
-        TestSecureOrganizationAPI._assert(response, True)
 
-    def test_api_organization_create_without_image(self, app):
+    def test_api_organization_create_without_image(self, _call_api, _assert):
         """Test that the API allows organization creation without an image URL."""
-        sysadmin = factories.Sysadmin(image_url='')
-        env = {'REMOTE_USER': sysadmin['name']}
         org_dict = {
             'name': 'test-org',
             'title': 'Test Organization'
         }
-        url = toolkit.url_for('api.action', ver=3, logic_function='organization_create')
-        response = app.post(
-            url,
-            json=org_dict,
-            extra_environ=env
+        _assert(
+            _call_api(org_dict, 'organization_create', True),
+            True,
+            ''
         )
-        TestSecureOrganizationAPI._assert(response, True, '')
 
-    def test_api_organization_update_remove_image(self, app):
+    def test_api_organization_update_remove_image(self, _call_api,_assert):
         """Test that the API allows removing image URL during update."""
-        sysadmin = factories.Sysadmin(image_url='')
-        env = {'REMOTE_USER': sysadmin['name']}
-
         org = factories.Organization(image_url='/images/original.jpg')
-
         update_dict = {
             'id': org['id'],
             'image_url': ''
         }
-        url = toolkit.url_for('api.action', ver=3, logic_function='organization_update')
-        response = app.post(
-            url,
-            json=update_dict,
-            extra_environ=env
+        _assert(
+            _call_api(update_dict, 'organization_update', True),
+            True,
+            ''
         )
-        TestSecureOrganizationAPI._assert(response, True, '')
