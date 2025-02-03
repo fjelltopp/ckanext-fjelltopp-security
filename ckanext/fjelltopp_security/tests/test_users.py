@@ -123,3 +123,62 @@ class TestSecureUserActions:
         response_dict = response.json
         assert response_dict['success'] is True
         assert response_dict['result']['image_url'] == '/images/test-user.jpg'
+
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_user_update_with_external_image(self, app):
+        """Test that the API blocks external images during user update."""
+        # Create a regular user first
+        user = factories.User(
+            image_url='/images/default-user.png'
+        )
+        sysadmin = factories.Sysadmin(
+            image_url='/images/default-user.png'
+        )
+        env = {'REMOTE_USER': sysadmin['name']}
+
+        # Try to update with external image
+        update_dict = {
+            'id': user['id'],
+            'email': 'updated@example.com',
+            'image_url': 'https://example.com/image.jpg'
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='user_update')
+        response = app.post(
+            url,
+            json=update_dict,
+            extra_environ=env,
+            expect_errors=True
+        )
+        assert response.status_code == 409
+        error_dict = response.json
+        assert error_dict['success'] is False
+        assert 'Image URL must be a local path' in str(error_dict['error']['image_url'][0])
+
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_user_update_with_valid_image(self, app):
+        """Test that the API allows local image paths during user update."""
+        # Create a regular user first
+        user = factories.User(
+            image_url='/images/default-user.png'
+        )
+        sysadmin = factories.Sysadmin(
+            image_url='/images/default-user.png'
+        )
+        env = {'REMOTE_USER': sysadmin['name']}
+        # Update with valid local image
+        update_dict = {
+            'id': user['id'],
+            'email': 'updated@example.com',
+            'image_url': '/images/updated-user.jpg'
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='user_update')
+        response = app.post(
+            url,
+            json=update_dict,
+            extra_environ=env
+        )
+
+        assert response.status_code == 200
+        response_dict = response.json
+        assert response_dict['success'] is True
+        assert response_dict['result']['image_url'] == '/images/updated-user.jpg'
