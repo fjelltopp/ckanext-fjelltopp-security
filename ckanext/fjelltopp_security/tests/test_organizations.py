@@ -135,7 +135,7 @@ class TestSecureOrganizationAPI:
             'image_url': '/images/updated-image.jpg'
         }
         _assert(
-            _call_api(update_dict, 'organization_update', True),
+            _call_api(update_dict, 'organization_update'),
             True,
             '/images/updated-image.jpg'
         )
@@ -148,7 +148,7 @@ class TestSecureOrganizationAPI:
             'image_url': '/images/test-image.jpg'
         }
         _assert(
-            _call_api(org_dict, 'organization_create', True),
+            _call_api(org_dict, 'organization_create'),
             True
         )
 
@@ -159,7 +159,7 @@ class TestSecureOrganizationAPI:
             'title': 'Test Organization'
         }
         _assert(
-            _call_api(org_dict, 'organization_create', True),
+            _call_api(org_dict, 'organization_create'),
             True,
             ''
         )
@@ -172,7 +172,7 @@ class TestSecureOrganizationAPI:
             'image_url': ''
         }
         _assert(
-            _call_api(update_dict, 'organization_update', True),
+            _call_api(update_dict, 'organization_update'),
             True,
             ''
         )
