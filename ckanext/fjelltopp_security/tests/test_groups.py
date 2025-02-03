@@ -96,3 +96,138 @@ class TestSecureGroupActions:
             )
 
         assert 'Image URL must be a local path. External URLs are not allowed' in str(exception_info.value)
+
+
+    # Web API
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_group_create_with_external_image(self, app):
+        """Test that the API blocks external images during group creation."""
+        sysadmin = factories.Sysadmin(image_url='')
+        env = {'REMOTE_USER': sysadmin['name']}
+        group_dict = {
+            'name': 'test-group',
+            'title': 'Test Group',
+            'image_url': 'https://example.com/image.jpg'
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='group_create')
+        response = app.post(
+            url,
+            json=group_dict,
+            extra_environ=env,
+            expect_errors=True
+        )
+        assert response.status_code == 409
+        error_dict = response.json
+        assert error_dict['success'] is False
+        assert 'Image URL must be a local path' in str(error_dict['error'])
+
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_group_update_with_external_image(self, app):
+        """Test that the API blocks external images during group update."""
+        sysadmin = factories.Sysadmin(image_url='')
+        env = {'REMOTE_USER': sysadmin['name']}
+
+        group = factories.Group(image_url='/images/original.jpg')
+
+        update_dict = {
+            'id': group['id'],
+            'image_url': 'https://example.com/updated-image.jpg'
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='group_update')
+        response = app.post(
+            url,
+            json=update_dict,
+            extra_environ=env,
+            expect_errors=True
+        )
+        assert response.status_code == 409
+        error_dict = response.json
+        assert error_dict['success'] is False
+        assert 'Image URL must be a local path' in str(error_dict['error'])
+
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_group_update_with_valid_image(self, app):
+        """Test that the API allows local images during group update."""
+        sysadmin = factories.Sysadmin(image_url='')
+        env = {'REMOTE_USER': sysadmin['name']}
+
+        group = factories.Group(image_url='/images/original.jpg')
+
+        update_dict = {
+            'id': group['id'],
+            'image_url': '/images/updated-image.jpg'
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='group_update')
+        response = app.post(
+            url,
+            json=update_dict,
+            extra_environ=env
+        )
+        assert response.status_code == 200
+        result = response.json
+        assert result['success'] is True
+        assert result['result']['image_url'] == '/images/updated-image.jpg'
+
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_group_create_with_valid_image(self, app):
+        """Test that the API allows local images during group creation."""
+        sysadmin = factories.Sysadmin(image_url='')
+        env = {'REMOTE_USER': sysadmin['name']}
+        group_dict = {
+            'name': 'test-group',
+            'title': 'Test Group',
+            'image_url': '/images/test-image.jpg'
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='group_create')
+        response = app.post(
+            url,
+            json=group_dict,
+            extra_environ=env
+        )
+        assert response.status_code == 200
+        result = response.json
+        assert result['success'] is True
+        assert result['result']['image_url'] == '/images/test-image.jpg'
+
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_group_create_without_image(self, app):
+        """Test that the API allows group creation without an image URL."""
+        sysadmin = factories.Sysadmin(image_url='')
+        env = {'REMOTE_USER': sysadmin['name']}
+        group_dict = {
+            'name': 'test-group',
+            'title': 'Test Group'
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='group_create')
+        response = app.post(
+            url,
+            json=group_dict,
+            extra_environ=env
+        )
+        assert response.status_code == 200
+        result = response.json
+        assert result['success'] is True
+        assert 'image_url' not in result['result'] or not result['result']['image_url']
+
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
+    def test_api_group_update_remove_image(self, app):
+        """Test that the API allows removing image URL during update."""
+        sysadmin = factories.Sysadmin(image_url='')
+        env = {'REMOTE_USER': sysadmin['name']}
+
+        group = factories.Group(image_url='/images/original.jpg')
+
+        update_dict = {
+            'id': group['id'],
+            'image_url': ''
+        }
+        url = toolkit.url_for('api.action', ver=3, logic_function='group_update')
+        response = app.post(
+            url,
+            json=update_dict,
+            extra_environ=env
+        )
+        assert response.status_code == 200
+        result = response.json
+        assert result['success'] is True
+        assert not result['result']['image_url']
