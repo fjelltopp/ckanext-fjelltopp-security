@@ -1,14 +1,5 @@
-# fjelltopp_security-js:
-#   filter: rjsmin
-#   output: ckanext-fjelltopp_security/%(version)s-fjelltopp_security.js
-#   contents:
-#     - js/fjelltopp_security.js
-#   extra:
-#     preload:
-#       - base/main
-
-# fjelltopp_security-css:
-#   filter: cssrewrite
-#   output: ckanext-fjelltopp_security/%(version)s-fjelltopp_security.css
-#   contents:
-#     - css/fjelltopp_security.css
+fjelltopp-security-theme:
+  filter: cssrewrite
+  output: fjelltopp-security/%(version)s-fjelltopp-security.css
+  contents:
+    - css/fjelltopp_security.css
