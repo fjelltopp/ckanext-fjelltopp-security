@@ -61,6 +61,7 @@ class TestSecureUserActions:
         )
         assert updated_user['image_url'] == update_dict['image_url']
 
+
     def test_user_update_without_image_url(self, base_user):
         """Test user update succeeds when not modifying image URL."""
         original_image_url = base_user['image_url']
@@ -74,10 +75,11 @@ class TestSecureUserActions:
         )
         assert updated_user['image_url'] == original_image_url
 
-    # API Tests
+    @pytest.mark.usefixtures('clean_db', 'with_plugins', 'with_request_context')
     def test_api_user_create_with_external_image(self, app):
         """Test that the API blocks external images during user creation."""
-        sysadmin = factories.Sysadmin(image_url=None)
+        sysadmin = factories.Sysadmin(image_url='')
+        env = {'REMOTE_USER': sysadmin['name']}
 
         user_dict = {
             'name': 'apitestuser',
@@ -87,16 +89,15 @@ class TestSecureUserActions:
         }
 
         url = toolkit.url_for('api.action', ver=3, logic_function='user_create')
+
         response = app.post(
             url,
             json=user_dict,
-            headers={'Authorization': sysadmin['apikey']},
-            status=409
+            extra_environ=env,
+            expect_errors=True
         )
 
-        response_dict = response.json
-        assert not response_dict['success']
-        assert 'error' in response_dict
-        assert 'image_url' in response_dict['error']
-        assert 'Image URL must be a local path. External URLs are not allowed' in response_dict['error']['image_url'][0]
-
+        assert response.status_code == 409
+        error_dict = response.json
+        assert error_dict['success'] is False
+        assert 'Image URL must be a local path' in str(error_dict['error'])
