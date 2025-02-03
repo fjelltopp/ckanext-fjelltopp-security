@@ -7,12 +7,12 @@ jobs:
       # The CKAN version tag of the Solr and Postgres containers should match
       # the one of the container the tests run on.
       # You can switch this base image with a custom image tailored to your project
-      image: ckan/ckan-dev:2.11
+      image: ckan/ckan-base:2.10.4
     services:
       solr:
-        image: ckan/ckan-solr:2.11-solr9
+        image: ckan/ckan-solr:2.10-solr8
       postgres:
-        image: ckan/ckan-postgres-dev:2.11
+        image: ckan/ckan-postgres-dev:2.10
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -44,5 +44,4 @@ jobs:
 
         ckan -c test.ini db init
     - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.fjelltopp_security --disable-warnings ckanext/fjelltopp_security
-
+      run: pytest --ckan-ini=test.ini --cov=ckanext.fjelltopp_security--disable-warnings ckanext/zarr
