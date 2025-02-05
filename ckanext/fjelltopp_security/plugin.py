@@ -10,18 +10,12 @@ class FjelltoppSecurityPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IMiddleware, inherit=True)
     plugins.implements(plugins.IActions)
-    # plugins.implements(plugins.IValidators)
-
-
-    # plugins.implements(plugins.IConfigurable)
 
     # IConfigurer
     def update_config(self, config_):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
         toolkit.add_resource("assets", "fjelltopp-security")
-
-    # IValidators
 
     # IActions
     def get_actions(self):
