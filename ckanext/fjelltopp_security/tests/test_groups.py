@@ -82,4 +82,3 @@ class TestSecureGroupActions:
                 title='Updated Test Group',
                 image_url=image_url
             )
-
