@@ -1,5 +1,4 @@
-fjelltopp-security-theme:
-  filter: cssrewrite
-  output: fjelltopp-security/%(version)s-fjelltopp-security.css
-  contents:
-    - css/fjelltopp_security.css
+CustomImageUploader:
+    contents:
+        - js/fjelltopp-security-image-upload.js
+    output: fjelltopp-security/%(version)s_CustomImageUploader.js
