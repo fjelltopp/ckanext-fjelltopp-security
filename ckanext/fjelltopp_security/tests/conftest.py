@@ -9,6 +9,7 @@ def user():
         image_url=None
     )
 
+
 @pytest.fixture
 def context(user):
     return {
@@ -22,9 +23,10 @@ def context(user):
 def organization():
     return factories.Organization(image_url=None)
 
+
 @pytest.fixture
 def group(organization):
     return factories.Group(
-        owner_org=org["id"],
+        owner_org=organization["id"],
         image_url=None
     )
