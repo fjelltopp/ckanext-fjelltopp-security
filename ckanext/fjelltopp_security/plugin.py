@@ -52,13 +52,13 @@ class FjelltoppSecurityPlugin(plugins.SingletonPlugin):
                 "",
             )
             response.headers["Cross-Origin-Opener-Policy"] = config.get(
-                "ckanext.fjelltopp_security.Cross-Origin-Opener-Policy", "same-site"
+                "ckanext.fjelltopp_security.cross_origin_opener_policy", "same-site"
             )
             response.headers["Cross-Origin-Embedder-Policy"] = config.get(
-                "ckanext.fjelltopp_security.Cross-Origin-Embedder-Policy", "unsafe-none"
+                "ckanext.fjelltopp_security.cross_origin_embedder_policy", "unsafe-none"
             )
             response.headers["Cross-Origin-Resource-Policy"] = config.get(
-                "ckanext.fjelltopp_security.Cross-Origin-Resource-Policy", "cross-origin"
+                "ckanext.fjelltopp_security.cross_origin_resource_policy", "cross-origin"
             )
             response.headers["Content-Security-Policy"] = config.get(
                 "ckanext.fjelltopp_security.content_security_policy", ""
