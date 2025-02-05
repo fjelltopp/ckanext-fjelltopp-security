@@ -40,7 +40,7 @@ class TestSecurityMiddleware:
         assert response.headers["X-Content-Type-Options"] == "custom-value"
         assert response.headers["X-Permitted-Cross-Domain-Policies"] == "custom-policy"
         assert response.headers["Referrer-Policy"] == "same-origin"
-        # CKAN will make the Cache-Control private when the url requires a session
+        # CKAN will make the Cache-Control private
         assert response.headers["Cache-Control"] == "no-store, private"
         assert response.headers["Cross-Origin-Opener-Policy"] == "same-origin"
         assert response.headers["Cross-Origin-Embedder-Policy"] == "require-corp"
