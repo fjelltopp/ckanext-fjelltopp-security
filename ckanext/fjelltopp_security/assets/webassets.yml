@@ -1,0 +1,4 @@
+CustomImageUploader:
+    contents:
+        - js/fjelltopp-security-image-upload.js
+    output: fjelltopp-security/%(version)s_CustomImageUploader.js
