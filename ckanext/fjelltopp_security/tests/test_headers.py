@@ -29,8 +29,6 @@ class TestSecurityMiddleware:
     @pytest.mark.ckan_config("ckanext.fjelltopp_security.strict_transport_security", "max-age=86400")
     @pytest.mark.ckan_config("ckanext.fjelltopp_security.content_type_options", "custom-value")
     def test_custom_config_values(self, app):
-        """Test that custom config values override defaults"""
-        # Create a test dataset to get a valid URL
         dataset = factories.Dataset()
         url = toolkit.url_for('dataset.read', id=dataset['name'])
 
@@ -40,9 +38,6 @@ class TestSecurityMiddleware:
         assert response.headers["X-Content-Type-Options"] == "custom-value"
 
     def test_clear_site_data_on_logout(self, app):
-        """Test that Clear-Site-Data header is set on logout redirect"""
-
-        # Create a mock route that simulates the logout redirect
         @app.flask_app.route('/test_logout')
         def test_logout():
             response = app.flask_app.make_response('')
@@ -56,9 +51,6 @@ class TestSecurityMiddleware:
         assert response.headers.get("Clear-Site-Data") == '"*"'
 
     def test_clear_site_data_not_set_without_redirect(self, app):
-        """Test that Clear-Site-Data header is not set without logged_out_redirect"""
-
-        # Create a mock route with a different redirect
         @app.flask_app.route('/test_other_redirect')
         def test_other_redirect():
             response = app.flask_app.make_response('')
@@ -72,8 +64,6 @@ class TestSecurityMiddleware:
         assert "Clear-Site-Data" not in response.headers
 
     def test_no_clear_site_data_on_normal_response(self, app):
-        """Test that Clear-Site-Data header is not set on normal responses"""
-        # Create a test dataset to get a valid URL
         dataset = factories.Dataset()
         url = toolkit.url_for('dataset.read', id=dataset['name'])
 
@@ -84,7 +74,6 @@ class TestSecurityMiddleware:
     @pytest.mark.ckan_config("ckanext.fjelltopp_security.content_security_policy",
                              "default-src 'self'; script-src 'self' 'unsafe-inline'")
     def test_content_security_policy(self, app):
-        """Test that Content-Security-Policy header is set correctly"""
         dataset = factories.Dataset()
         url = toolkit.url_for('dataset.read', id=dataset['name'])
 
