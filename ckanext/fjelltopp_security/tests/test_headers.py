@@ -8,22 +8,18 @@ from ckan.common import config
 class TestSecurityMiddleware:
 
     def test_default_security_headers(self, app):
-        """Test that default security headers are set correctly"""
-        # Create a test dataset to get a valid URL
-        dataset = factories.Dataset()
-        url = toolkit.url_for('dataset.read', id=dataset['name'])
-        
+        url = toolkit.url_for('user.login')
         response = app.get(url)
         
         assert response.headers["Strict-Transport-Security"] == "max-age=31536000; preload"
         assert response.headers["X-Content-Type-Options"] == "nosniff"
         assert response.headers["X-Permitted-Cross-Domain-Policies"] == "none"
         assert response.headers["Referrer-Policy"] == "no-referrer-when-downgrade"
+        assert response.headers["Cache-Control"] == "private"
+        assert response.headers["Content-Security-Policy"] == ""
         assert response.headers["Cross-Origin-Opener-Policy"] == "same-site"
         assert response.headers["Cross-Origin-Embedder-Policy"] == "unsafe-none"
         assert response.headers["Cross-Origin-Resource-Policy"] == "cross-origin"
-        assert "Content-Security-Policy" in response.headers
-        assert "Cache-Control" in response.headers
 
 
     @pytest.mark.ckan_config("ckanext.fjelltopp_security.strict_transport_security", "max-age=86400")
@@ -44,6 +40,7 @@ class TestSecurityMiddleware:
         assert response.headers["X-Content-Type-Options"] == "custom-value"
         assert response.headers["X-Permitted-Cross-Domain-Policies"] == "custom-policy"
         assert response.headers["Referrer-Policy"] == "same-origin"
+        # CKAN will make the Cache-Control private when the url requires a session
         assert response.headers["Cache-Control"] == "no-store, private"
         assert response.headers["Cross-Origin-Opener-Policy"] == "same-origin"
         assert response.headers["Cross-Origin-Embedder-Policy"] == "require-corp"
