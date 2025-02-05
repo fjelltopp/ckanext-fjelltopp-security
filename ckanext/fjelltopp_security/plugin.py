@@ -20,12 +20,12 @@ class FjelltoppSecurityPlugin(plugins.SingletonPlugin):
     # IActions
     def get_actions(self):
         return {
-            'user_update': fjelltopp_security_actions.secure_user_update,
-            'user_create': fjelltopp_security_actions.secure_user_create,
-            'group_update': fjelltopp_security_actions.secure_group_update,
-            'group_create': fjelltopp_security_actions.secure_group_create,
-            'organization_update': fjelltopp_security_actions.secure_organization_update,
-            'organization_create': fjelltopp_security_actions.secure_organization_create,
+            'user_update': fjelltopp_security_actions.validate_image_url_first,
+            'user_create': fjelltopp_security_actions.validate_image_url_first,
+            'group_update': fjelltopp_security_actions.validate_image_url_first,
+            'group_create': fjelltopp_security_actions.validate_image_url_first,
+            'organization_update': fjelltopp_security_actions.validate_image_url_first,
+            'organization_create': fjelltopp_security_actions.validate_image_url_first,
         }
 
     # IMiddleware

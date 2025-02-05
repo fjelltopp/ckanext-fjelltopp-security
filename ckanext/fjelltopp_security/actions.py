@@ -23,58 +23,11 @@ def validate_no_external_images(data_dict):
                 'image_url': ['Image URL must be a local path. External URLs are not allowed']
             })
 
-def secure_user_update(context, data_dict):
+
+@toolkit.chained_action
+def validate_image_url_first(original_action, context, data_dict):
     """
-    Custom user update action that extends CKAN's default user_update.
+    Checks the data dict for an image_url, and ensures it is a valid upload.
     """
     validate_no_external_images(data_dict)
-    return core_user_update(context, data_dict)
-
-
-def secure_user_create(context, data_dict):
-    """
-    Custom user create action that extends CKAN's default user_create.
-    """
-    toolkit.check_access('user_create', context, data_dict)
-    validate_no_external_images(data_dict)
-    return core_user_create(context, data_dict)
-
-
-def secure_group_update(context, data_dict):
-    """
-    Custom group update action that extends CKAN's default group_update.
-    Validates that no external images are used in the group.
-    """
-    toolkit.check_access('user_create', context, data_dict)
-    validate_no_external_images(data_dict)
-    return core_group_update(context, data_dict)
-
-
-def secure_group_create(context, data_dict):
-    """
-    Custom group create action that extends CKAN's default group_create.
-    Validates that no external images are used in the group.
-    """
-    toolkit.check_access('user_create', context, data_dict)
-    validate_no_external_images(data_dict)
-    return core_group_create(context, data_dict)
-
-
-def secure_organization_update(context, data_dict):
-    """
-    Custom organization update action that extends CKAN's default organization_update.
-    Validates that no external images are used in the organization.
-    """
-    toolkit.check_access('user_create', context, data_dict)
-    validate_no_external_images(data_dict)
-    return core_organization_update(context, data_dict)
-
-
-def secure_organization_create(context, data_dict):
-    """
-    Custom organization create action that extends CKAN's default organization_create.
-    Validates that no external images are used in the organization.
-    """
-    toolkit.check_access('user_create', context, data_dict)
-    validate_no_external_images(data_dict)
-    return core_organization_create(context, data_dict)
+    return original_action(context, data_dict)
