@@ -1,5 +1,4 @@
 import pytest
-from ckan.tests import factories
 from ckan.logic import ValidationError
 from ckan.tests.helpers import call_action
 
